@@ -13,7 +13,12 @@ server.send(msg, 0, msg.length, 10501, '192.168.2.15', async (err, bytes) => {
         client.close();                        
     };
     console.log(`\nSent ${bytes} bytes to ECOM`);        
-});                
+});     
+
+server.on('listening', function () {
+    var address = server.address();
+    console.log('UDP Server listening on ' + address.address + ":" + address.port);
+});
 
 server.on('message', (msg, info) => {
     console.log(`ECOM response: ${msg.toString()}`);                       
