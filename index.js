@@ -1,27 +1,33 @@
-const dgram = require('dgram');
 const udp = require('dgram');
-const client = dgram.createSocket('udp4');
 const server = udp.createSocket('udp4'); 
 
-//const msg = '455849540d' // EXIT //
-const msg = Buffer.from('EXIT');
+// ECOM connection settings
+const port = 10501;
+const ip = '213.186.202.161';
 
+// text message to ECOM
+const textMessage = 'CONFIG?';  // 'CONFIG2?' 'EXIT'  'IP?'
 
-server.send(msg, 0, msg.length, 10501, '192.168.2.15', async (err, bytes) => {
+// convert string to hex
+const stringToHex = (stringMessage) => {
+    let result = '';
+    for (let i = 0; i < stringMessage.length; i++) {
+        result += stringMessage.charCodeAt(i).toString(16);
+    };
+    return result;
+};
+
+const msg = Buffer.from(stringToHex(textMessage) + '0d', 'hex');
+
+server.send(msg, 0, msg.length, port, ip, async (err, bytes) => {
     if(err){
         console.log(err);                            
-        client.close();                        
+        server.close();                        
     };
-    console.log(`\nSent ${bytes} bytes to ECOM`);        
+    console.log(`\nSent message "${textMessage}" to ECOM. Package size: ${bytes} bytes.\n`);        
 });     
 
-server.on('listening', function () {
-    var address = server.address();
-    console.log('UDP Server listening on ' + address.address + ":" + address.port);
-});
-
 server.on('message', (msg, info) => {
-    console.log(`ECOM response: ${msg.toString()}`);                       
-                   
-    //server.close();                      
+    console.log(`ECOM response:\n ${msg.toString()}`);                                        
+    server.close();                      
 });
